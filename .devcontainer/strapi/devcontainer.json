@@ -1,0 +1,25 @@
+// https://aka.ms/devcontainer.json
+{
+    "name": "Strapi",
+    "dockerComposeFile": [
+        "../../docker-compose.local.yml"
+    ],
+    "service": "strapi",
+    "workspaceFolder": "/opt",
+    "mounts": [
+        "type=bind,source=/home/${localEnv:USER}/.ssh,target=/home/node/.ssh,readonly"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "mikestead.dotenv",
+                "streetsidesoftware.code-spell-checker",
+                "shd101wyy.markdown-preview-enhanced",
+                "pmneo.tsimporter"
+            ],
+            "settings": {}
+        }
+    },
+    "remoteUser": "node"
+}

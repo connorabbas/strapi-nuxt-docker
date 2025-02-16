@@ -1,0 +1,37 @@
+// https://aka.ms/devcontainer.json
+{
+    "name": "Nuxt",
+    "dockerComposeFile": [
+        "../../docker-compose.local.yml"
+    ],
+    "service": "nuxt",
+    "workspaceFolder": "/web",
+    "mounts": [
+        "type=bind,source=/home/${localEnv:USER}/.ssh,target=/home/node/.ssh,readonly"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "mikestead.dotenv",
+                "streetsidesoftware.code-spell-checker",
+                "hollowtree.vue-snippets",
+                "Vue.volar",
+                "Nuxtr.nuxtr-vscode",
+                "bradlc.vscode-tailwindcss",
+                "shd101wyy.markdown-preview-enhanced",
+                "formulahendry.auto-rename-tag",
+                "pmneo.tsimporter"
+            ],
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/sh",
+                "html.format.wrapAttributes": "force-expand-multiline",
+                "[vue]": {
+                    "editor.defaultFormatter": "Vue.volar",
+                    "editor.tabSize": 4
+                }
+            }
+        }
+    },
+    "remoteUser": "node"
+}
