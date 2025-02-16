@@ -33,5 +33,6 @@
             }
         }
     },
+    "postCreateCommand": "echo 'nuxt' > .git/info/sparse-checkout && git read-tree -mu HEAD",
     "remoteUser": "node"
 }

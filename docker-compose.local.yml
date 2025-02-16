@@ -8,6 +8,7 @@ services:
     working_dir: /web
     volumes:
       - './nuxt:/web'
+      - './.git:/web/.git'
       - /web/node_modules
     tty: true
     labels:

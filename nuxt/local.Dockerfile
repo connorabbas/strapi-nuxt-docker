@@ -9,7 +9,9 @@ RUN mkdir -p /web/node_modules && \
     chmod 775 /web/node_modules
 
 USER node
-RUN git config --global --add safe.directory /web
+RUN git config --global --add safe.directory /web && \
+    git config --global core.sparseCheckout true && \
+    git config --global core.fileMode false
 
 WORKDIR /web
 
