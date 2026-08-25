@@ -2,14 +2,12 @@ services:
   nuxt:
     container_name: nuxt
     build:
-      context: ./nuxt
-      dockerfile: local.Dockerfile
-    entrypoint: /bin/sh
-    working_dir: /web
+      context: ./.devcontainer/nuxt
+      dockerfile: Dockerfile
+    command: ["sleep", "infinity"]
+    working_dir: /workspace/nuxt
     volumes:
-      - './nuxt:/web'
-      - './.git:/web/.git'
-      - /web/node_modules
+      - './:/workspace'
     tty: true
     labels:
       - "traefik.enable=true"
@@ -18,18 +16,16 @@ services:
     networks:
       - strapi
       - proxy
-    depends_on:
-      - strapi
 
   strapi:
     container_name: strapi
     build:
-      context: ./strapi
-      dockerfile: local.Dockerfile
-    working_dir: /opt
+      context: ./.devcontainer/strapi
+      dockerfile: Dockerfile
+    command: ["sleep", "infinity"]
+    working_dir: /workspace/strapi
     volumes:
-      - ./strapi:/opt
-      - /opt/node_modules
+      - './:/workspace'
     tty: true
     labels:
       - "traefik.enable=true"
@@ -39,31 +35,35 @@ services:
       - strapi
       - proxy
     depends_on:
-      - strapiDB
+      strapiDB:
+        condition: service_healthy
 
   strapiDB:
     container_name: strapiDB
-    platform: linux/amd64 #for platform error on Apple M1 chips
-    image: postgres:12.0-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
-      - strapi-data:/var/lib/postgresql/data/ #using a volume
-      #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
+      - strapi-pg-data:/var/lib/postgresql/data/
     ports:
       - "${FORWARD_DB_PORT:-5432}:5432"
     networks:
       - strapi
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  strapi-data:
+  strapi-pg-data:
 
 networks:
   strapi:
     name: Strapi
     driver: bridge
   proxy:
-    name: "traefik_network" # registered as standalone container outside this project
+    name: "traefik_proxy" # registered as standalone container stack outside this project
     external: true
