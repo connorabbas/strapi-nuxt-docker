@@ -10,13 +10,11 @@ Icon
 .Trashes
 ._*
 
-
 ############################
 # Linux
 ############################
 
 *~
-
 
 ############################
 # Windows
@@ -30,7 +28,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-
 
 ############################
 # Packages
@@ -60,7 +57,6 @@ $RECYCLE.BIN/
 *.out
 *.pid
 
-
 ############################
 # Logs and databases
 ############################
@@ -68,9 +64,9 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
+!.github/workflows/db/**/*.sql
 *.sqlite
 *.sqlite3
-
 
 ############################
 # Misc.
@@ -82,7 +78,6 @@ ssl
 nbproject
 public/uploads/*
 !public/uploads/.gitkeep
-.tsbuildinfo
 .eslintcache
 
 ############################
@@ -96,36 +91,84 @@ logs
 results
 node_modules
 .node_history
+*.heapsnapshot
 
 ############################
-# Package managers
+# Local environment
 ############################
-
-.yarn/*
-!.yarn/cache
-!.yarn/unplugged
-!.yarn/patches
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
-yarn-error.log
+# Ignore real env files anywhere; tracked templates use other names (e.g. `.env.example`).
+**/.env
+!tests/cli/data/*.tar.gz
 
 ############################
 # Tests
 ############################
 
+test-apps
 coverage
+
+############################
+# Builds
+############################
+
+dist
+.tsbuildinfo
+build
+
+############################
+# Visual Studio Code
+############################
+
+.vscode/
+front-workspace.code-workspace
+.yarnrc
+
+############################
+# Package managers
+############################
+
+.pnp.*
+.yarn/*
+!.yarn/cache
+!.yarn/unplugged
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-error.log
+pnpm-debug.log
+npm-debug.log
+
+############################
+# Playwright
+############################
+playwright-report
+tests/e2e/playwright-storage-state.json
+test-results
+
+############################
+# AI tools
+############################
+.brain
+.brain.*
+
+# Claude
+CLAUDE.local.md
+.claude/
+
+# Cursor
+.cursor/
+!.cursor/worktrees.json
+
+# Codex
+.agents/
 
 ############################
 # Strapi
 ############################
-
-.env
 license.txt
 exports
 .strapi
-dist
-build
 .strapi-updater.json
 .strapi-cloud.json

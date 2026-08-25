@@ -2,12 +2,19 @@
 {
     "name": "Strapi",
     "dockerComposeFile": [
-        "../../docker-compose.local.yml"
+        "../../docker-compose.dev.yml"
     ],
     "service": "strapi",
-    "workspaceFolder": "/opt",
+    "initializeCommand": "mkdir -p \"${localWorkspaceFolder}/nuxt\" \"${localWorkspaceFolder}/strapi\"",
+    "workspaceFolder": "/workspace/strapi",
+    "shutdownAction": "none",
     "mounts": [
-        "type=bind,source=/home/${localEnv:USER}/.ssh,target=/home/node/.ssh,readonly"
+        "type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly",
+        "type=bind,source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,readonly",
+        "type=bind,source=${localWorkspaceFolder}/.devcontainer/.bashrc,target=/home/node/.bashrc,readonly",
+        "type=bind,source=${localEnv:HOME}/.config/opencode,target=/home/node/.config/opencode",
+        "type=bind,source=${localEnv:HOME}/.local/share/opencode,target=/home/node/.local/share/opencode",
+        "type=bind,source=${localEnv:HOME}/.local/state/opencode,target=/home/node/.local/state/opencode"
     ],
     "customizations": {
         "vscode": {
@@ -18,7 +25,9 @@
                 "shd101wyy.markdown-preview-enhanced",
                 "pmneo.tsimporter"
             ],
-            "settings": {}
+            "settings": {
+                "git.openRepositoryInParentFolders": "always"
+            }
         }
     },
     "remoteUser": "node"
