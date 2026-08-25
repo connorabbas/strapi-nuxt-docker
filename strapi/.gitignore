@@ -175,6 +175,8 @@ CLAUDE.local.md
 ############################
 # Strapi
 ############################
+.strapi
+.strapi-updater.json
 examples/**/types/generated
 .nx/cache
 .nx/workspace-data
