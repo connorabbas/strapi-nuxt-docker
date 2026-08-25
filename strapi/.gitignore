@@ -66,14 +66,18 @@ $RECYCLE.BIN/
 *.sql
 !.github/workflows/db/**/*.sql
 *.sqlite
+*.sqlite3
 
 ############################
 # Misc.
 ############################
 
 *#
+ssl
 .idea
 nbproject
+public/uploads/*
+!public/uploads/.gitkeep
 .eslintcache
 
 ############################
@@ -85,12 +89,8 @@ lcov.info
 pids
 logs
 results
-build
 node_modules
 .node_history
-package-lock.json
-**/package-lock.json
-!docs/package-lock.json
 *.heapsnapshot
 
 ############################
@@ -111,19 +111,9 @@ coverage
 # Builds
 ############################
 
-packages/generators/app/files/public/
-schema.graphql
 dist
-.nx
 .tsbuildinfo
-.eslintcache
-
-############################
-# Example app
-############################
-
-.dev
-# *.cache
+build
 
 ############################
 # Visual Studio Code
@@ -139,6 +129,8 @@ front-workspace.code-workspace
 
 .pnp.*
 .yarn/*
+!.yarn/cache
+!.yarn/unplugged
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -175,11 +167,8 @@ CLAUDE.local.md
 ############################
 # Strapi
 ############################
+license.txt
+exports
 .strapi
 .strapi-updater.json
-examples/**/types/generated
-.nx/cache
-.nx/workspace-data
-
-# Ignore yarn.lock inside templates
-templates/yarn.lock
+.strapi-cloud.json
