@@ -2,30 +2,43 @@
 {
     "name": "Nuxt",
     "dockerComposeFile": [
-        "../../docker-compose.local.yml"
+        "../../docker-compose.dev.yml"
     ],
     "service": "nuxt",
-    "workspaceFolder": "/web",
+    "initializeCommand": "mkdir -p \"${localWorkspaceFolder}/nuxt\" \"${localWorkspaceFolder}/strapi\"",
+    "workspaceFolder": "/workspace/nuxt",
+    "shutdownAction": "none",
     "mounts": [
-        "type=bind,source=/home/${localEnv:USER}/.ssh,target=/home/node/.ssh,readonly"
+        "type=bind,source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,readonly",
+        "type=bind,source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,readonly",
+        "type=bind,source=${localWorkspaceFolder}/.devcontainer/.bashrc,target=/home/node/.bashrc,readonly",
+        "type=bind,source=${localEnv:HOME}/.config/opencode,target=/home/node/.config/opencode",
+        "type=bind,source=${localEnv:HOME}/.local/share/opencode,target=/home/node/.local/share/opencode",
+        "type=bind,source=${localEnv:HOME}/.local/state/opencode,target=/home/node/.local/state/opencode"
     ],
     "customizations": {
         "vscode": {
             "extensions": [
                 "eamodio.gitlens",
+                "esbenp.prettier-vscode",
                 "mikestead.dotenv",
                 "streetsidesoftware.code-spell-checker",
                 "hollowtree.vue-snippets",
                 "Vue.volar",
-                "Nuxtr.nuxtr-vscode",
+                "dbaeumer.vscode-eslint",
+                "EditorConfig.EditorConfig",
                 "bradlc.vscode-tailwindcss",
                 "shd101wyy.markdown-preview-enhanced",
                 "formulahendry.auto-rename-tag",
-                "pmneo.tsimporter"
+                "pmneo.tsimporter",
+                "redhat.vscode-yaml"
             ],
             "settings": {
-                "terminal.integrated.shell.linux": "/bin/sh",
+                "terminal.integrated.shell.linux": "/bin/bash",
+                "git.openRepositoryInParentFolders": "always",
                 "html.format.wrapAttributes": "force-expand-multiline",
+                "js/ts.preferences.quoteStyle": "single",
+                "js/ts.format.semicolons": "remove",
                 "[vue]": {
                     "editor.defaultFormatter": "Vue.volar",
                     "editor.tabSize": 4
@@ -33,6 +46,5 @@
             }
         }
     },
-    "postCreateCommand": "echo 'nuxt' > .git/info/sparse-checkout && git read-tree -mu HEAD",
     "remoteUser": "node"
 }
