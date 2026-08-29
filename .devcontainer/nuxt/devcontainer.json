@@ -5,7 +5,7 @@
         "../../docker-compose.dev.yml"
     ],
     "service": "nuxt",
-    "runServices": ["nuxt"],
+    "runServices": ["nuxt", "strapi"],
     "initializeCommand": "mkdir -p \"${localWorkspaceFolder}/nuxt\" \"${localWorkspaceFolder}/strapi\"",
     "workspaceFolder": "/workspace/nuxt",
     "shutdownAction": "none",

@@ -22,7 +22,7 @@ services:
     build:
       context: ./.devcontainer/strapi
       dockerfile: Dockerfile
-    command: ["sleep", "infinity"]
+    command: ["npm", "run", "dev"]
     working_dir: /workspace/strapi
     volumes:
       - './:/workspace'

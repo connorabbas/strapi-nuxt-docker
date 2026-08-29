@@ -9,4 +9,6 @@ Copy the root, `nuxt`, and `strapi` `.env.example` files to their respective
 Rebuild and Reopen in Container**. Choose either the Nuxt or Strapi configuration.
 
 Each configuration opens only its application directory while retaining the
-root Git repository and shared OpenCode configuration.
+root Git repository and shared OpenCode configuration. Opening the Nuxt
+configuration also starts Strapi and its Postgres database; start Nuxt itself
+with `npm run dev` from the Nuxt terminal.
