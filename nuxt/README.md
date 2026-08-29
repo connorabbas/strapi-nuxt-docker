@@ -1,75 +1,24 @@
-# Nuxt Minimal Starter
+# Nuxt Frontend
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Nuxt is the browser-facing BFF for Strapi. Browser code must call Nuxt `/api` routes only; server routes use the private Docker hostname `strapi` to reach the Strapi Content API.
 
 ## Setup
 
-Make sure to install dependencies:
+1. Start Strapi, then create a read-only Content API token at `http://admin.strapi-nuxt.localhost/admin`.
+2. Copy `.env.example` to `.env` and set `NUXT_STRAPI_API_TOKEN`. Keep `NUXT_STRAPI_URL=http://strapi:1337` for Docker.
+3. Start Nuxt and request `GET /api/health/strapi` to verify the connection.
+
+`/example` demonstrates an SSR call to the local `GET /api/example/users` route.
+
+Browser code must call Nuxt `/api` routes only. Keep Strapi tokens private, and map BFF responses to only the fields the page needs.
+
+## Commands
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
