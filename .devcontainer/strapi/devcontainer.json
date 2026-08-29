@@ -5,6 +5,7 @@
         "../../docker-compose.dev.yml"
     ],
     "service": "strapi",
+    "runServices": ["strapi", "strapiDB"],
     "initializeCommand": "mkdir -p \"${localWorkspaceFolder}/nuxt\" \"${localWorkspaceFolder}/strapi\"",
     "workspaceFolder": "/workspace/strapi",
     "shutdownAction": "none",
