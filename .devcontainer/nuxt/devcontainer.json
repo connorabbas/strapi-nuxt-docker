@@ -5,6 +5,7 @@
         "../../docker-compose.dev.yml"
     ],
     "service": "nuxt",
+    "runServices": ["nuxt", "strapi"],
     "initializeCommand": "mkdir -p \"${localWorkspaceFolder}/nuxt\" \"${localWorkspaceFolder}/strapi\"",
     "workspaceFolder": "/workspace/nuxt",
     "shutdownAction": "none",
@@ -28,7 +29,6 @@
                 "dbaeumer.vscode-eslint",
                 "EditorConfig.EditorConfig",
                 "bradlc.vscode-tailwindcss",
-                "shd101wyy.markdown-preview-enhanced",
                 "formulahendry.auto-rename-tag",
                 "pmneo.tsimporter",
                 "redhat.vscode-yaml"

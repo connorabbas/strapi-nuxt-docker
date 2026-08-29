@@ -1,4 +1,7 @@
-FROM node:22-bookworm-slim
+FROM node:24-bookworm-slim
+
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
 
 USER root
 RUN apt-get update && apt-get install -y \
@@ -7,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
     openssh-client \
     && rm -rf /var/lib/apt/lists/*
-RUN npm install --global npm@11.6.2
+RUN npm install --global npm@11
+RUN npm config set fetch-retries 5 -g
 RUN mkdir -p \
     /home/node/.config \
     /home/node/.local/share \
