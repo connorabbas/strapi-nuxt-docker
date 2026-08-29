@@ -10,7 +10,7 @@ function refreshUsers() {
 </script>
 
 <template>
-    <UContainer class="py-12 sm:py-16">
+    <UContainer>
         <UPageHeader
             headline="Strapi"
             title="Users example"
@@ -21,6 +21,8 @@ function refreshUsers() {
                     label="Refresh users"
                     color="neutral"
                     variant="outline"
+                    icon="i-lucide-refresh-cw"
+                    loading-icon="i-lucide-refresh-cw"
                     :loading="status === 'pending'"
                     @click="refreshUsers"
                 />
@@ -44,10 +46,7 @@ function refreshUsers() {
                     v-if="status === 'pending'"
                     class="space-y-3"
                 >
-                    <USkeleton class="h-4 w-1/3" />
-                    <USkeleton class="h-4 w-full" />
-                    <USkeleton class="h-4 w-5/6" />
-                    <USkeleton class="h-4 w-2/3" />
+                    <USkeleton class="h-100 w-full" />
                 </div>
 
                 <UAlert
