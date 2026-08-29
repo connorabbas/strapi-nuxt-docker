@@ -13,8 +13,9 @@
         "typecheck": "nuxt typecheck"
     },
     "dependencies": {
-        "@strapi/client": "^1.6.2",
+        "@nuxt/fonts": "^0.14.0",
         "@nuxt/ui": "^4.11.0",
+        "@strapi/client": "^1.6.2",
         "nuxt": "^4.5.2",
         "tailwindcss": "^4.3.3",
         "vue": "^3.5.41",

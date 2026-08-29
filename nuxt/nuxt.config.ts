@@ -2,7 +2,8 @@
 export default defineNuxtConfig({
     modules: [
         '@nuxt/eslint',
-        '@nuxt/ui'
+        '@nuxt/ui',
+        '@nuxt/fonts'
     ],
     devtools: { enabled: true },
     css: ['~/assets/css/main.css'],
@@ -18,5 +19,14 @@ export default defineNuxtConfig({
                 braceStyle: '1tbs'
             }
         }
+    },
+    fonts: {
+        families: [
+            {
+                name: 'Inter',
+                provider: 'google',
+                global: true
+            }
+        ]
     }
 })

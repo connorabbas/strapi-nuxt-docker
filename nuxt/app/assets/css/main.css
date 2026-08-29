@@ -4,3 +4,7 @@
 :root {
     --ui-header-height: 4rem;
 }
+
+body {
+    font-family: 'Inter', sans-serif;
+}
