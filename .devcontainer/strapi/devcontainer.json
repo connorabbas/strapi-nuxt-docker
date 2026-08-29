@@ -22,7 +22,6 @@
                 "eamodio.gitlens",
                 "mikestead.dotenv",
                 "streetsidesoftware.code-spell-checker",
-                "shd101wyy.markdown-preview-enhanced",
                 "pmneo.tsimporter"
             ],
             "settings": {
