@@ -98,6 +98,8 @@ node_modules
 ############################
 # Ignore real env files anywhere; tracked templates use other names (e.g. `.env.example`).
 **/.env
+**/.env.*
+!**/.env.example
 !tests/cli/data/*.tar.gz
 
 ############################
