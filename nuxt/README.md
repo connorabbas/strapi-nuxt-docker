@@ -4,7 +4,7 @@ Nuxt is the browser-facing BFF for Strapi. Browser code must call Nuxt `/api` ro
 
 ## Setup
 
-1. The Nuxt Dev Container starts Strapi automatically. Create a read-only Content API token at `http://admin.strapi-nuxt.localhost/admin`.
+1. The Nuxt Dev Container starts Strapi automatically. Create a read-only Content API token at `http://strapi.strapi-nuxt.localhost/admin`.
 2. Copy `.env.example` to `.env` and set `NUXT_STRAPI_API_TOKEN`. Keep `NUXT_STRAPI_URL=http://strapi:1337` for Docker.
 3. Start Nuxt and request `GET /api/health/strapi` to verify the connection.
 
