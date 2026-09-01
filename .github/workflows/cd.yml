@@ -1,0 +1,143 @@
+name: cd
+
+on:
+  workflow_call:
+    inputs:
+      stack_name:
+        description: Docker Swarm stack name. Defaults to SWARM_STACK_NAME secret.
+        required: false
+        type: string
+      environment:
+        description: GitHub deployment environment.
+        required: false
+        type: string
+        default: production
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: Docker Swarm stack name. Defaults to SWARM_STACK_NAME secret.
+        required: false
+        type: string
+      environment:
+        description: GitHub deployment environment.
+        required: false
+        type: string
+        default: production
+
+concurrency:
+  group: swarm-${{ inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      image-tag: ${{ steps.images.outputs.image-tag }}
+      nuxt-image: ${{ steps.images.outputs.nuxt-image }}
+      strapi-image: ${{ steps.images.outputs.strapi-image }}
+      stack-name: ${{ steps.images.outputs.stack-name }}
+    steps:
+      - name: Prepare image names
+        id: images
+        shell: bash
+        run: |
+          repository="${GITHUB_REPOSITORY,,}"
+          stack_name="${STACK_NAME:-$DEFAULT_STACK_NAME}"
+
+          if [ -z "$stack_name" ]; then
+            echo "SWARM_STACK_NAME secret or stack_name input is required" >&2
+            exit 1
+          fi
+
+          echo "image-tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "nuxt-image=ghcr.io/${repository}-nuxt" >> "$GITHUB_OUTPUT"
+          echo "strapi-image=ghcr.io/${repository}-strapi" >> "$GITHUB_OUTPUT"
+          echo "stack-name=${stack_name}" >> "$GITHUB_OUTPUT"
+        env:
+          STACK_NAME: ${{ inputs.stack_name }}
+          DEFAULT_STACK_NAME: ${{ secrets.SWARM_STACK_NAME }}
+
+  build-nuxt:
+    runs-on: ubuntu-latest
+    needs: prepare
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build and push Nuxt image
+        uses: serversideup/github-action-docker-build@v6
+        with:
+          context: ./nuxt
+          dockerfile: ./nuxt/Dockerfile
+          target: release
+          platforms: linux/amd64
+          registry: ghcr.io
+          registry-username: ${{ github.repository_owner }}
+          registry-password: ${{ github.token }}
+          registry-2: dhi.io
+          registry-2-username: ${{ secrets.DHI_REGISTRY_USERNAME }}
+          registry-2-password: ${{ secrets.DHI_REGISTRY_TOKEN }}
+          tags: |
+            ${{ needs.prepare.outputs.nuxt-image }}:${{ needs.prepare.outputs.image-tag }}
+            ${{ needs.prepare.outputs.nuxt-image }}:latest
+
+  build-strapi:
+    runs-on: ubuntu-latest
+    needs: prepare
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build and push Strapi image
+        uses: serversideup/github-action-docker-build@v6
+        with:
+          context: ./strapi
+          dockerfile: ./strapi/Dockerfile
+          target: release
+          platforms: linux/amd64
+          registry: ghcr.io
+          registry-username: ${{ github.repository_owner }}
+          registry-password: ${{ github.token }}
+          tags: |
+            ${{ needs.prepare.outputs.strapi-image }}:${{ needs.prepare.outputs.image-tag }}
+            ${{ needs.prepare.outputs.strapi-image }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build-nuxt
+      - build-strapi
+    permissions:
+      contents: read
+      packages: read
+    environment: ${{ inputs.environment || 'production' }}
+    env:
+      NUXT_IMAGE: ${{ needs.prepare.outputs.nuxt-image }}
+      STRAPI_IMAGE: ${{ needs.prepare.outputs.strapi-image }}
+      IMAGE_TAG: ${{ needs.prepare.outputs.image-tag }}
+      SWARM_STACK_NAME: ${{ needs.prepare.outputs.stack-name }}
+    steps:
+      - name: Deploy stack to Docker Swarm
+        uses: serversideup/github-action-docker-swarm-deploy@v4
+        with:
+          stack_name: ${{ needs.prepare.outputs.stack-name }}
+          docker_compose_file_path: '-c docker-compose-swarm.yml'
+          ssh_deploy_private_key: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
+          ssh_deploy_user: ${{ secrets.SSH_DEPLOY_USER }}
+          ssh_remote_hostname: ${{ secrets.SSH_REMOTE_HOSTNAME }}
+          ssh_remote_port: ${{ secrets.SSH_REMOTE_PORT || '22' }}
+          ssh_remote_known_hosts: ${{ secrets.SSH_REMOTE_KNOWN_HOSTS }}
+          registry: ghcr.io
+          registry-username: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          registry-password: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+          env_file_base64: ${{ secrets.PRODUCTION_ENV_FILE_BASE64 }}
+          log_level: info

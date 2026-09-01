@@ -1,19 +1,16 @@
 name: ci
 
-on: push
+on:
+  push:
+  pull_request:
 
 jobs:
-  ci:
-    runs-on: ${{ matrix.os }}
+  nuxt:
+    runs-on: ubuntu-latest
 
     defaults:
       run:
         working-directory: nuxt
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [24]
 
     steps:
       - name: Checkout
@@ -22,7 +19,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
           cache: npm
           cache-dependency-path: nuxt/package-lock.json
 
@@ -37,3 +34,52 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  strapi:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: strapi
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: strapi/package-lock.json
+
+      - name: Install npm
+        run: npm install --global npm@11 && npm config set fetch-retries 5 -g
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+          APP_KEYS: ci-key-1,ci-key-2
+          API_TOKEN_SALT: ci-api-token-salt
+          ADMIN_JWT_SECRET: ci-admin-jwt-secret
+          JWT_SECRET: ci-jwt-secret
+          TRANSFER_TOKEN_SALT: ci-transfer-token-salt
+          ENCRYPTION_KEY: ci-encryption-key
+
+  deploy:
+    needs:
+      - nuxt
+      - strapi
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/cd.yml
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
