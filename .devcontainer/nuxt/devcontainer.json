@@ -46,5 +46,6 @@
             }
         }
     },
+    "postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
     "remoteUser": "node"
 }

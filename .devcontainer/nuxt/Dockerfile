@@ -19,8 +19,6 @@ RUN mkdir -p \
     && chown -R node:node /home/node/.config /home/node/.local
 
 USER node
-ENV PATH=/home/node/.opencode/bin:$PATH
-RUN curl -fsSL https://opencode.ai/install | bash
 RUN git config --global --add safe.directory /workspace
 
 WORKDIR /workspace/nuxt
