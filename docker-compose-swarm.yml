@@ -1,0 +1,192 @@
+services:
+  nuxt:
+    image: "${NUXT_IMAGE:?NUXT_IMAGE is required}:${IMAGE_TAG:?IMAGE_TAG is required}"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      NUXT_STRAPI_URL: http://strapi:1337
+      NUXT_STRAPI_API_TOKEN: "${NUXT_STRAPI_API_TOKEN:?NUXT_STRAPI_API_TOKEN is required}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=64M,mode=1777
+    networks:
+      - app
+      - proxy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then((r)=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      replicas: ${DEPLOY_NUXT_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+        monitor: 60s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        window: 120s
+      resources:
+        limits:
+          cpus: "${DEPLOY_NUXT_CPU_LIMIT:-0.50}"
+          memory: "${DEPLOY_NUXT_MEMORY_LIMIT:-512M}"
+        reservations:
+          cpus: "${DEPLOY_NUXT_CPU_RESERVATION:-0.10}"
+          memory: "${DEPLOY_NUXT_MEMORY_RESERVATION:-128M}"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_proxy"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.rule=Host(`${DEPLOY_APP_DOMAIN:?DEPLOY_APP_DOMAIN is required}`)"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.entrypoints=websecure"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.tls=true"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.tls.certresolver=letsencrypt"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.loadbalancer.server.port=3000"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.loadbalancer.healthcheck.path=/api/health"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.loadbalancer.healthcheck.interval=30s"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-nuxt.loadbalancer.healthcheck.timeout=5s"
+
+  strapi:
+    image: "${STRAPI_IMAGE:?STRAPI_IMAGE is required}:${IMAGE_TAG:?IMAGE_TAG is required}"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "1337"
+      PUBLIC_URL: "https://${DEPLOY_STRAPI_DOMAIN:?DEPLOY_STRAPI_DOMAIN is required}"
+      IS_PROXIED: "true"
+      PROXY_IP_HEADER: X-Forwarded-For
+      MAX_IPS_COUNT: "1"
+      APP_KEYS: "${STRAPI_APP_KEYS:?STRAPI_APP_KEYS is required}"
+      API_TOKEN_SALT: "${STRAPI_API_TOKEN_SALT:?STRAPI_API_TOKEN_SALT is required}"
+      ADMIN_JWT_SECRET: "${STRAPI_ADMIN_JWT_SECRET:?STRAPI_ADMIN_JWT_SECRET is required}"
+      JWT_SECRET: "${STRAPI_JWT_SECRET:?STRAPI_JWT_SECRET is required}"
+      TRANSFER_TOKEN_SALT: "${STRAPI_TRANSFER_TOKEN_SALT:?STRAPI_TRANSFER_TOKEN_SALT is required}"
+      ENCRYPTION_KEY: "${STRAPI_ENCRYPTION_KEY:?STRAPI_ENCRYPTION_KEY is required}"
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: "${POSTGRES_DB:?POSTGRES_DB is required}"
+      DATABASE_USERNAME: "${POSTGRES_USER:?POSTGRES_USER is required}"
+      DATABASE_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+      DATABASE_SSL: "false"
+      DATABASE_POOL_MIN: "2"
+      DATABASE_POOL_MAX: "10"
+      DATABASE_CONNECTION_TIMEOUT: "60000"
+      WEBHOOKS_POPULATE_RELATIONS: "false"
+      CRON_ENABLED: "false"
+      STRAPI_TELEMETRY_DISABLED: "true"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=128M,mode=1777
+    volumes:
+      - strapi-uploads:/app/public/uploads
+    networks:
+      - app
+      - proxy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:1337/_health').then((r)=>{if(r.status!==204)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app-data == true
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+        failure_action: rollback
+        monitor: 90s
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+        monitor: 90s
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        window: 180s
+      resources:
+        limits:
+          cpus: "${DEPLOY_STRAPI_CPU_LIMIT:-1.00}"
+          memory: "${DEPLOY_STRAPI_MEMORY_LIMIT:-1024M}"
+        reservations:
+          cpus: "${DEPLOY_STRAPI_CPU_RESERVATION:-0.25}"
+          memory: "${DEPLOY_STRAPI_MEMORY_RESERVATION:-512M}"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.swarm.network=traefik_proxy"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.rule=Host(`${DEPLOY_STRAPI_DOMAIN:?DEPLOY_STRAPI_DOMAIN is required}`)"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.entrypoints=websecure"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.tls=true"
+        - "traefik.http.routers.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.tls.certresolver=letsencrypt"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.loadbalancer.server.port=1337"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.loadbalancer.healthcheck.path=/_health"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.loadbalancer.healthcheck.interval=30s"
+        - "traefik.http.services.${SWARM_STACK_NAME:-nuxt-strapi}-strapi.loadbalancer.healthcheck.timeout=10s"
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:?POSTGRES_DB is required}"
+      POSTGRES_USER: "${POSTGRES_USER:?POSTGRES_USER is required}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.app-data == true
+      update_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: pause
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        window: 120s
+      resources:
+        limits:
+          cpus: "${DEPLOY_POSTGRES_CPU_LIMIT:-0.75}"
+          memory: "${DEPLOY_POSTGRES_MEMORY_LIMIT:-768M}"
+        reservations:
+          cpus: "${DEPLOY_POSTGRES_CPU_RESERVATION:-0.10}"
+          memory: "${DEPLOY_POSTGRES_MEMORY_RESERVATION:-256M}"
+
+volumes:
+  postgres-data:
+  strapi-uploads:
+
+networks:
+  app:
+    driver: overlay
+    internal: true
+    attachable: true
+  proxy:
+    name: traefik_proxy
+    external: true

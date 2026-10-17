@@ -29,8 +29,8 @@ services:
     tty: true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.admin-strapi-nuxt.rule=Host(`admin.strapi-nuxt.localhost`)"
-      - "traefik.http.services.admin-strapi-nuxt.loadbalancer.server.port=${STRAPI_TRAEFIK_PORT:-1337}"
+      - "traefik.http.routers.strapi-strapi-nuxt.rule=Host(`strapi.strapi-nuxt.localhost`)"
+      - "traefik.http.services.strapi-strapi-nuxt.loadbalancer.server.port=${STRAPI_TRAEFIK_PORT:-1337}"
     networks:
       - strapi
       - proxy
